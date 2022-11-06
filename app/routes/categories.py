@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from starlette.status import HTTP_409_CONFLICT
 
-from app.dependencies import get_category_depend, jwt_dependency
+from app.dependencies import get_category_depend
 
 from db.models import CarCategory
 from db.pydantic_models import CarCategoryIn_pydantic, CarCategoryOut_pydantic
-from db.utils import get_paginated_items, update_from_dict
+from app.utils import get_paginated_items, update_from_dict
 
 router = APIRouter(
     prefix="/categories",

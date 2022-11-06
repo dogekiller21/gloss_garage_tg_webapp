@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_409_CONFLICT
 from tortoise.exceptions import OperationalError
 
-from app.dependencies import get_service_depend, jwt_dependency
+from app.dependencies import get_service_depend
 from db.models import Service, ServiceCategoryPrice
 from db.pydantic_models import Service_pydantic, AddServiceForm, BoundServiceCategory, ServiceCategoryPrice_pydantic
-from db.utils import get_paginated_items, bound_service_and_category, update_service_from_dict
+from app.utils import get_paginated_items, bound_service_and_category, update_service_from_dict
 
 router = APIRouter(
     prefix="/services",

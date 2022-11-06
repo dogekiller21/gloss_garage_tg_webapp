@@ -1,27 +1,30 @@
-from aiogram import Bot, Dispatcher, executor
-from aiogram import types
+import asyncio
+import logging
+
+from aiogram import Bot, Dispatcher
 from aiogram.types.web_app_info import WebAppInfo
 
+import db
 from bot.config import FRONT_END_LINK
+from bot.middlewares import UserMiddleware
 from config import TG_TOKEN
 
+logging.basicConfig(level=logging.INFO)
 bot = Bot(token=TG_TOKEN)
 dp = Dispatcher(bot)
 
-
-@dp.message_handler(commands=["test"])
-async def test_command(message: types.Message):
-    webapp_info = WebAppInfo(url=FRONT_END_LINK)
-
-    keyboard = types.InlineKeyboardMarkup().add(
-        types.InlineKeyboardButton(text="WebApp", web_app=webapp_info)
-    )
-    await message.answer(text="test", reply_markup=keyboard)
-    await bot.set_chat_menu_button(
-        chat_id=message.chat.id,
-        menu_button=types.MenuButtonWebApp(text="Приложение", web_app=webapp_info),
-    )
+webapp_info = WebAppInfo(url=FRONT_END_LINK)
 
 
 if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True)
+    from handlers import dp
+    dp.setup_middleware(UserMiddleware())
+    loop = asyncio.new_event_loop()
+    loop.run_until_complete(db.init_db())
+    loop.run_until_complete(db.init_admins())
+    loop.create_task(
+        dp.start_polling(
+            reset_webhook=None, timeout=20, relax=0.1, fast=True, allowed_updates=None
+        )
+    )
+    loop.run_forever()

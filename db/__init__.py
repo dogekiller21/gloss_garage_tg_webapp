@@ -1,5 +1,8 @@
 from tortoise import Tortoise
-from .config import DB_USER, DB_PASSWORD, DB_HOST, DB_NAME
+
+from bot.constants import SUPREME_ADMINS_ID
+from db.config import DB_USER, DB_PASSWORD, DB_HOST, DB_NAME
+from db.models import SupremeAdmin
 
 
 async def init_db():
@@ -8,3 +11,8 @@ async def init_db():
         modules={"models": ["db.models"]},
     )
     await Tortoise.generate_schemas(safe=True)
+
+
+async def init_admins():
+    for admin_id in SUPREME_ADMINS_ID:
+        await SupremeAdmin.get_or_create(tg_id=admin_id)

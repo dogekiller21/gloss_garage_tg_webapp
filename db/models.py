@@ -75,9 +75,9 @@ class RenderedService(Model):
         return f"RenderedService({self.car=}, {self.price=}, {self.service=})"
 
 
-class SupremacyAdmin(Model):
+class SupremeAdmin(Model):
     id = fields.IntField(pk=True)
     tg_id = fields.BigIntField(null=False)
 
     def __str__(self):
-        return f"SupremacyAdmin({self.tg_id=})"
+        return f"SupremeAdmin({self.tg_id=})"
