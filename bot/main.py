@@ -18,6 +18,7 @@ webapp_info = WebAppInfo(url=FRONT_END_LINK)
 
 if __name__ == "__main__":
     from handlers import dp
+
     dp.setup_middleware(UserMiddleware())
     loop = asyncio.new_event_loop()
     loop.run_until_complete(db.init_db())

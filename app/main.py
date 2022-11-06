@@ -8,22 +8,19 @@ from tortoise.contrib.fastapi import register_tortoise
 from app.auth import (
     validate_tg_data,
     create_access_token,
-    DataStringForm, JWTBearer,
+    DataStringForm,
+    JWTBearer,
 )
-from app.routes import services, categories
+from app.routes import services, categories, users, cars
 from db import DB_USER, DB_PASSWORD, DB_HOST, DB_NAME
 from db.models import User, ServiceCategoryPrice
 from starlette.middleware.cors import CORSMiddleware
 
-from db.pydantic_models import (
-    User_pydantic,
-    ServiceCategoryPrice_pydantic,
-    BoundServiceCategory,
-)
-
 app = FastAPI()
 app.include_router(services.router)
 app.include_router(categories.router)
+app.include_router(users.router)
+app.include_router(cars.router)
 
 
 @app.post("/auth")
@@ -35,14 +32,8 @@ async def token(form_data: DataStringForm = Depends()):
 
 
 @app.get("/")
-async def home_page(user: User = Depends(JWTBearer())):
-    return {"message": "yo", "id": user.id}
-
-
-@app.get("/users")
-async def get_users():
-    users = await User_pydantic.from_queryset(User.all())
-    return {"users": users}
+async def home_page(payload=Depends(JWTBearer())):
+    return {"message": "yo", "id": payload["tg_id"]}
 
 
 register_tortoise(

@@ -13,7 +13,7 @@ async def start_command(message: types.Message):
         f"Личный кабинет доступен по кнопочке снизу или слева от вашей клавиатуры!\n\n"
         f"Наш адрес - xxx\n"
         f"Будем рады видеть вас с 9:00 до 21:00 в каждый день недели!",
-        reply_markup=keyboard
+        reply_markup=keyboard,
     )
     await bot.set_chat_menu_button(
         chat_id=message.chat.id,

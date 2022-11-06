@@ -8,9 +8,12 @@ from typing import Union
 import pytz
 from fastapi import HTTPException, Request
 from jose import jwt, JWTError
-from starlette.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_422_UNPROCESSABLE_ENTITY
+from starlette.status import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_403_FORBIDDEN,
+    HTTP_422_UNPROCESSABLE_ENTITY,
+)
 
-from db.models import User
 from .config import JWT_SECRET_KEY
 from .constants import ACCESS_TOKEN_EXPIRE_MINUTES, JWT_ALGORITHM
 from bot.config import TG_TOKEN
@@ -25,14 +28,16 @@ class DataStringForm:
 
 def validate_tg_data(data_string: str):
     if data_string == "test":
-        return 1
+        return 431057920
     tg_data = unquote(data_string).split("&")
     try:
         parsed_data = {
             key: value for (key, value) in sorted(chunk.split("=") for chunk in tg_data)
         }
     except ValueError:
-        raise HTTPException(HTTP_422_UNPROCESSABLE_ENTITY, detail="Incorrect data string")
+        raise HTTPException(
+            HTTP_422_UNPROCESSABLE_ENTITY, detail="Incorrect data string"
+        )
     tg_hash = parsed_data.get("hash")
     tg_user = json.loads(parsed_data["user"])
     tg_id = tg_user.get("id")
@@ -78,10 +83,19 @@ class JWTBearer(HTTPBearer):
 
     async def __call__(self, request: Request):
         print("called")
-        credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
+        credentials: HTTPAuthorizationCredentials = await super(
+            JWTBearer, self
+        ).__call__(request)
         if not credentials:
-            raise HTTPException(HTTP_403_FORBIDDEN, detail="Invalid authorization code.")
+            raise HTTPException(
+                HTTP_403_FORBIDDEN, detail="Invalid authorization code."
+            )
         if not credentials.scheme == "Bearer":
-            raise HTTPException(HTTP_403_FORBIDDEN, detail="Invalid authentication scheme.")
+            raise HTTPException(
+                HTTP_403_FORBIDDEN, detail="Invalid authentication scheme."
+            )
         payload = decode_jwt(credentials.credentials)
         return payload
+
+
+jwt_dependency = JWTBearer()

@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from tortoise.contrib.pydantic import pydantic_model_creator
 
-from db.models import Service, User, ServiceCategoryPrice, CarCategory
+from db.models import Service, User, ServiceCategoryPrice, CarCategory, Car
 from tortoise import Tortoise
 
 Tortoise.init_models(["db.models"], "models")
@@ -29,10 +29,17 @@ ServiceCategoryPriceInMultiple_pydantic = pydantic_model_creator(
 
 CarCategory_pydantic = pydantic_model_creator(CarCategory, name="CarCategory")
 CarCategoryIn_pydantic = pydantic_model_creator(
-    CarCategory, name="CarCategoryIn", exclude_readonly=True,
+    CarCategory,
+    name="CarCategoryIn",
+    exclude_readonly=True,
 )
 CarCategoryOut_pydantic = pydantic_model_creator(
     CarCategory, name="CarCategoryOut", exclude=("prices", "cars")
+)
+
+Car_pydantic = pydantic_model_creator(Car, name="Car")
+CarIn_pydantic = pydantic_model_creator(
+    Car, name="CarIn", exclude_readonly=True, exclude=("owner_id",)
 )
 
 
@@ -44,3 +51,9 @@ class BoundServiceCategory(BaseModel):
 
 class AddServiceForm(ServiceIn_pydantic):
     prices: list[ServiceCategoryPriceInMultiple_pydantic] | None
+
+
+class PaginationForm(BaseModel):
+    q: str | None = None
+    limit: int = 5
+    page: int = 0

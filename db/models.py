@@ -37,7 +37,7 @@ class Car(Model):
     )
 
     def __str__(self):
-        return f"Car({self.numberplate=}, {self.numberplate=})"
+        return f"Car({self.brand=}, {self.model=}, {self.numberplate=})"
 
 
 class ServiceCategoryPrice(Model):

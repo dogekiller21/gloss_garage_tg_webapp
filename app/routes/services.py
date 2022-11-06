@@ -2,23 +2,36 @@ from fastapi import APIRouter, Depends, HTTPException
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_409_CONFLICT
 from tortoise.exceptions import OperationalError
 
+from app.auth import jwt_dependency
 from app.dependencies import get_service_depend
 from db.models import Service, ServiceCategoryPrice
-from db.pydantic_models import Service_pydantic, AddServiceForm, BoundServiceCategory, ServiceCategoryPrice_pydantic
-from app.utils import get_paginated_items, bound_service_and_category, update_service_from_dict
+from db.pydantic_models import (
+    Service_pydantic,
+    AddServiceForm,
+    BoundServiceCategory,
+    ServiceCategoryPrice_pydantic,
+    PaginationForm,
+)
+from app.utils import (
+    get_paginated_items,
+    bound_service_and_category,
+    update_service_from_dict,
+)
 
 router = APIRouter(
     prefix="/services",
     tags=["services"],
     dependencies=[
         # Depends(jwt_dependency)
-    ]
+    ],
 )
 
 
 @router.get("")
-async def get_services(q: str | None = None, limit: int = 5, page: int = 0):
-    data = await get_paginated_items(q, page, limit, Service_pydantic, Service, "title")
+async def get_services(form=PaginationForm):
+    data = await get_paginated_items(
+        form.q, form.page, form.limit, Service_pydantic, Service, "title"
+    )
     return data
 
 
@@ -59,8 +72,7 @@ async def delete_service(service: Service = Depends(get_service_depend)):
 @router.patch("/{service_id:int}")
 async def update_service(updated_service: AddServiceForm, service_id: int):
     updated_service_pydantic = await update_service_from_dict(
-        update_dict=updated_service.dict(),
-        service_id=service_id
+        update_dict=updated_service.dict(), service_id=service_id
     )
     return {**updated_service_pydantic.dict()}
 
