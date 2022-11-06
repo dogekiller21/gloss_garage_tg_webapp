@@ -28,7 +28,7 @@ router = APIRouter(
 
 
 @router.get("")
-async def get_services(form=PaginationForm):
+async def get_services(form: PaginationForm):
     data = await get_paginated_items(
         form.q, form.page, form.limit, Service_pydantic, Service, "title"
     )

@@ -1,8 +1,6 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends
 import uvicorn
-from starlette.status import (
-    HTTP_409_CONFLICT,
-)
+from starlette.responses import RedirectResponse
 from tortoise.contrib.fastapi import register_tortoise
 
 from app.auth import (
@@ -13,7 +11,6 @@ from app.auth import (
 )
 from app.routes import services, categories, users, cars
 from db import DB_USER, DB_PASSWORD, DB_HOST, DB_NAME
-from db.models import User, ServiceCategoryPrice
 from starlette.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -32,8 +29,8 @@ async def token(form_data: DataStringForm = Depends()):
 
 
 @app.get("/")
-async def home_page(payload=Depends(JWTBearer())):
-    return {"message": "yo", "id": payload["tg_id"]}
+async def home_page():
+    return RedirectResponse(url="docs")
 
 
 register_tortoise(
