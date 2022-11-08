@@ -10,7 +10,7 @@ from db.pydantic_models import (
     AddServiceForm,
     BoundServiceCategory,
     ServiceCategoryPrice_pydantic,
-    PaginationForm,
+    ServicePagination_pydantic,
 )
 from app.utils import (
     get_paginated_items,
@@ -28,9 +28,15 @@ router = APIRouter(
 
 
 @router.get("")
-async def get_services(form: PaginationForm):
+async def get_services(q: str | None = None, limit: int = 5, page: int = 0):
     data = await get_paginated_items(
-        form.q, form.page, form.limit, Service_pydantic, Service, "title"
+        q=q,
+        page=page,
+        limit=limit,
+        pydantic_model=ServicePagination_pydantic,
+        tortoise_model=Service,
+        search_row="title",
+        fetch_related=["prices"],
     )
     return data
 

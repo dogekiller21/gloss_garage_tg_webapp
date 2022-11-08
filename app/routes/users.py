@@ -9,8 +9,8 @@ router = APIRouter(
 )
 
 
-@router.get("")
-async def get_users(sadmin_auth=Depends(sadmin_depend)):
+@router.get("", dependencies=[Depends(sadmin_depend)])
+async def get_users():
     users = await User_pydantic.from_queryset(User.all())
     return {"users": users}
 

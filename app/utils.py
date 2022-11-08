@@ -7,7 +7,7 @@ from tortoise import Model
 from tortoise.contrib.pydantic import PydanticModel
 
 from db.models import Service, CarCategory, ServiceCategoryPrice
-from db.pydantic_models import Service_pydantic, ServiceCategoryPrice_pydantic
+from db.pydantic_models import Service_pydantic
 
 
 async def bound_service_and_category(
@@ -31,17 +31,22 @@ async def get_paginated_items(
     pydantic_model: PydanticModel,
     tortoise_model: Union[Model, Any],
     search_row: str = "title",
+    fetch_related: list[str] = None,
 ):
     if limit <= 0 or page < 0:
         raise HTTPException(
             HTTP_400_BAD_REQUEST, detail="Limit and page must be positive"
         )
     if q is None or not q:
-        items = await pydantic_model.from_queryset(tortoise_model.all().order_by("id"))
+        items_tortoise = await tortoise_model.all().order_by("id")
     else:
-        items = await pydantic_model.from_queryset(
-            tortoise_model.filter(**{f"{search_row}__icontains": q}).order_by("id")
-        )
+        items_tortoise = await tortoise_model.filter(
+            **{f"{search_row}__icontains": q}
+        ).order_by("id")
+    if fetch_related is not None:
+        await tortoise_model.fetch_for_list(items_tortoise, *fetch_related)
+    items = [await pydantic_model.from_tortoise_orm(item) for item in items_tortoise]
+
     offset = page * limit
     query_limit = offset + limit
     if (offset > len(items) - 1) and (len(items) >= limit) and (len(items) != 0):

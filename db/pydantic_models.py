@@ -10,6 +10,13 @@ Service_pydantic = pydantic_model_creator(Service, name="Service")
 ServiceIn_pydantic = pydantic_model_creator(
     Service, name="ServiceIn", exclude_readonly=True
 )
+ServicePagination_pydantic = pydantic_model_creator(
+    Service,
+    name="ServicePagination",
+    exclude=("prices", "rendered_services"),
+    computed=("max_default_price", "min_default_price"),
+)
+
 
 User_pydantic = pydantic_model_creator(User, name="User")
 UserIn_pydantic = pydantic_model_creator(User, name="UserIn", exclude_readonly=True)

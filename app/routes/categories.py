@@ -10,7 +10,6 @@ from db.pydantic_models import (
     CarCategoryIn_pydantic,
     CarCategoryOut_pydantic,
     CarCategory_pydantic,
-    PaginationForm,
 )
 from app.utils import get_paginated_items, update_from_dict
 
@@ -24,9 +23,9 @@ router = APIRouter(
 
 
 @router.get("")
-async def get_categories(form: PaginationForm):
+async def get_categories(q: str | None = None, limit: int = 5, page: int = 0):
     data = await get_paginated_items(
-        form.q, form.page, form.limit, CarCategoryOut_pydantic, CarCategory, "title"
+        q, page, limit, CarCategoryOut_pydantic, CarCategory, "title"
     )
     return data
 

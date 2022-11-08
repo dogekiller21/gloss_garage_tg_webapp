@@ -1,5 +1,6 @@
 import datetime
 
+from tortoise.exceptions import NoValuesFetched
 from tortoise.models import Model
 from tortoise import fields
 
@@ -58,6 +59,26 @@ class Service(Model):
     id = fields.IntField(pk=True)
     title = fields.CharField(max_length=255, null=False, unique=True)
     self_cost = fields.IntField()
+    prices: fields.ReverseRelation["ServiceCategoryPrice"]
+    rendered_services: fields.ReverseRelation["RenderedService"]
+
+    def max_default_price(self) -> int:
+        try:
+            if len(self.prices) > 0:
+                return max([price.default_price for price in self.prices])
+            else:
+                return 0
+        except NoValuesFetched:
+            return 0
+
+    def min_default_price(self) -> int:
+        try:
+            if len(self.prices) > 0:
+                return min([price.default_price for price in self.prices])
+            else:
+                return 0
+        except NoValuesFetched:
+            return 0
 
     def __str__(self):
         return f"Service({self.title=}, {self.self_cost})"

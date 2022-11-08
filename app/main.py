@@ -3,12 +3,8 @@ import uvicorn
 from starlette.responses import RedirectResponse
 from tortoise.contrib.fastapi import register_tortoise
 
-from app.auth import (
-    validate_tg_data,
-    create_access_token,
-    DataStringForm,
-    JWTBearer,
-)
+import db
+from app.auth import validate_tg_data, create_access_token, DataStringForm
 from app.routes import services, categories, users, cars
 from db import DB_USER, DB_PASSWORD, DB_HOST, DB_NAME
 from starlette.middleware.cors import CORSMiddleware
@@ -33,12 +29,7 @@ async def home_page():
     return RedirectResponse(url="docs")
 
 
-register_tortoise(
-    app,
-    db_url=f"postgres://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:5432/{DB_NAME}",
-    modules={"models": ["db.models"]},
-    generate_schemas=True,
-)
+register_tortoise(app, config=db.TORTOISE_ORM)
 
 origins = [
     "http://localhost:8080",
