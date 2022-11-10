@@ -11,8 +11,7 @@ router = APIRouter(
 
 @router.get("", dependencies=[Depends(sadmin_depend)])
 async def get_users():
-    users = await User_pydantic.from_queryset(User.all())
-    return {"users": users}
+    return await User_pydantic.from_queryset(User.all())
 
 
 @router.get("/me")

@@ -2,11 +2,18 @@ import math
 from typing import Any, Union
 
 from fastapi import HTTPException
-from starlette.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
+from starlette.status import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+    HTTP_409_CONFLICT,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
 from tortoise import Model
 from tortoise.contrib.pydantic import PydanticModel
+from tortoise.exceptions import OperationalError
+from tortoise.expressions import Q
 
-from db.models import Service, CarCategory, ServiceCategoryPrice
+from db.models import Service, CarCategory, ServiceCategoryPrice, Car
 from db.pydantic_models import Service_pydantic
 
 
@@ -26,33 +33,38 @@ async def bound_service_and_category(
 
 async def get_paginated_items(
     q: str | None,
-    page: int,
-    limit: int,
+    page: int | None,
+    limit: int | None,
     pydantic_model: PydanticModel,
     tortoise_model: Union[Model, Any],
-    search_row: str = "title",
+    search_rows: list[str] = None,
     fetch_related: list[str] = None,
 ):
-    if limit <= 0 or page < 0:
+    if limit and page and (limit <= 0 or page < 0):
         raise HTTPException(
             HTTP_400_BAD_REQUEST, detail="Limit and page must be positive"
         )
+    if search_rows is None:
+        search_rows = ["title"]
     if q is None or not q:
         items_tortoise = await tortoise_model.all().order_by("id")
     else:
-        items_tortoise = await tortoise_model.filter(
-            **{f"{search_row}__icontains": q}
-        ).order_by("id")
+        expressions = [Q(**{f"{row}__icontains": q}) for row in search_rows]
+        tortoise_expression = Q(*expressions, join_type="OR")
+        items_tortoise = await tortoise_model.filter(tortoise_expression).order_by("id")
     if fetch_related is not None:
         await tortoise_model.fetch_for_list(items_tortoise, *fetch_related)
     items = [await pydantic_model.from_tortoise_orm(item) for item in items_tortoise]
+    if (page and limit) is None:
+        return items
 
     offset = page * limit
     query_limit = offset + limit
-    if (offset > len(items) - 1) and (len(items) >= limit) and (len(items) != 0):
-        raise HTTPException(HTTP_400_BAD_REQUEST, detail="Too much offset")
-    return_items = items[offset:query_limit]
 
+    if (offset > len(items) - 1) and (len(items) >= limit) and (len(items) != 0):
+        return_items = list()
+    else:
+        return_items = items[offset:query_limit]
     has_prev = offset != 0
     has_next = query_limit < len(items)
     max_page = math.ceil(len(items) / limit)
@@ -138,3 +150,21 @@ async def simple_object_creation(model, creation_field: str, data_dict: dict):
         if not is_created:
             raise HTTPException(HTTP_409_CONFLICT, detail="Already Exist")
     return obj
+
+
+async def delete_obj(obj: Model | Any, pydantic_model: PydanticModel) -> dict:
+    try:
+        await obj.delete()
+    except OperationalError:
+        raise HTTPException(
+            HTTP_500_INTERNAL_SERVER_ERROR, detail="Not deleted due to internal error"
+        )
+    return {**(await pydantic_model.from_tortoise_orm(obj)).dict()}
+
+
+async def get_all_car_brands():
+    return [value["brand"] for value in (await Car.all().values("brand"))]
+
+
+async def get_all_car_models():
+    return [value["model"] for value in (await Car.all().values("model"))]

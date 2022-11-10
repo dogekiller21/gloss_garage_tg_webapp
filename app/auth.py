@@ -26,7 +26,7 @@ class DataStringForm:
         self.data_string = data_string
 
 
-def validate_tg_data(data_string: str):
+def validate_tg_data(data_string: str) -> int:
     if data_string == "test":
         return 431057920
     tg_data = unquote(data_string).split("&")
@@ -69,7 +69,7 @@ def decode_jwt(jwt_token: str) -> dict:
         payload = jwt.decode(jwt_token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
     except JWTError:
         raise HTTPException(HTTP_403_FORBIDDEN, detail="Invalid token.")
-    expiration_date = pytz.UTC.localize(
+    expiration_date = pytz.utc.localize(
         dt=datetime.fromisoformat(payload["expiration_date"])
     )
     if expiration_date <= datetime.now(pytz.utc):
@@ -82,7 +82,6 @@ class JWTBearer(HTTPBearer):
         super(JWTBearer, self).__init__(auto_error=auto_error)
 
     async def __call__(self, request: Request):
-        print("called")
         credentials: HTTPAuthorizationCredentials = await super(
             JWTBearer, self
         ).__call__(request)

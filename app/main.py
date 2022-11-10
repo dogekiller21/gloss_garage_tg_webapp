@@ -6,7 +6,6 @@ from tortoise.contrib.fastapi import register_tortoise
 import db
 from app.auth import validate_tg_data, create_access_token, DataStringForm
 from app.routes import services, categories, users, cars
-from db import DB_USER, DB_PASSWORD, DB_HOST, DB_NAME
 from starlette.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -29,7 +28,7 @@ async def home_page():
     return RedirectResponse(url="docs")
 
 
-register_tortoise(app, config=db.TORTOISE_ORM)
+register_tortoise(app, config=db.TORTOISE_ORM, generate_schemas=True)
 
 origins = [
     "http://localhost:8080",

@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from starlette.status import HTTP_409_CONFLICT, HTTP_500_INTERNAL_SERVER_ERROR
-from tortoise.exceptions import OperationalError
+from starlette.status import HTTP_409_CONFLICT
 
 from app.auth import jwt_dependency
 from app.dependencies import get_category_depend
@@ -11,7 +10,7 @@ from db.pydantic_models import (
     CarCategoryOut_pydantic,
     CarCategory_pydantic,
 )
-from app.utils import get_paginated_items, update_from_dict
+from app.utils import get_paginated_items, update_from_dict, delete_obj
 
 router = APIRouter(
     prefix="/categories",
@@ -23,9 +22,14 @@ router = APIRouter(
 
 
 @router.get("")
-async def get_categories(q: str | None = None, limit: int = 5, page: int = 0):
+async def get_categories(q: str = None, limit: int = None, page: int = None):
     data = await get_paginated_items(
-        q, page, limit, CarCategoryOut_pydantic, CarCategory, "title"
+        q=q,
+        page=page,
+        limit=limit,
+        pydantic_model=CarCategoryOut_pydantic,
+        tortoise_model=CarCategory,
+        search_rows=["title"],
     )
     return data
 
@@ -47,13 +51,7 @@ async def add_category(category_form: CarCategoryIn_pydantic):
 
 @router.delete("/{category_id:int}")
 async def delete_category(category: CarCategory = Depends(get_category_depend)):
-    try:
-        await category.delete()
-    except OperationalError:
-        raise HTTPException(
-            HTTP_500_INTERNAL_SERVER_ERROR, detail="Not deleted due to internal error"
-        )
-    return {**(await CarCategory_pydantic.from_tortoise_orm(category)).dict()}
+    return await delete_obj(obj=category, pydantic_model=CarCategory_pydantic)
 
 
 @router.patch("/{category_id:int}")

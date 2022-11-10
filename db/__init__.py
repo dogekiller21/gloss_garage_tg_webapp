@@ -12,7 +12,6 @@ TORTOISE_ORM = {
         "models": {
             "models": ["db.models", "aerich.models"],
             "default_connection": "default",
-            "generate_schemas": True,
         }
     },
 }

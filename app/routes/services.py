@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_409_CONFLICT
-from tortoise.exceptions import OperationalError
+from starlette.status import HTTP_409_CONFLICT
 
 from app.auth import jwt_dependency
 from app.dependencies import get_service_depend
@@ -16,6 +15,7 @@ from app.utils import (
     get_paginated_items,
     bound_service_and_category,
     update_service_from_dict,
+    delete_obj,
 )
 
 router = APIRouter(
@@ -35,7 +35,7 @@ async def get_services(q: str | None = None, limit: int = 5, page: int = 0):
         limit=limit,
         pydantic_model=ServicePagination_pydantic,
         tortoise_model=Service,
-        search_row="title",
+        search_rows=["title"],
         fetch_related=["prices"],
     )
     return data
@@ -46,7 +46,7 @@ async def get_service(service: Service = Depends(get_service_depend)):
     return {**(await Service_pydantic.from_tortoise_orm(service)).dict()}
 
 
-@router.post("/")
+@router.post("")
 async def add_service(service_form: AddServiceForm):
     service_dict = service_form.dict()
     service, is_created = await Service.get_or_create(
@@ -66,13 +66,7 @@ async def add_service(service_form: AddServiceForm):
 
 @router.delete("/{service_id:int}")
 async def delete_service(service: Service = Depends(get_service_depend)):
-    try:
-        await service.delete()
-    except OperationalError:
-        raise HTTPException(
-            HTTP_500_INTERNAL_SERVER_ERROR, detail="Not deleted due to internal error"
-        )
-    return {"service": await Service_pydantic.from_tortoise_orm(service)}
+    return await delete_obj(obj=service, pydantic_model=Service_pydantic)
 
 
 @router.patch("/{service_id:int}")

@@ -48,6 +48,12 @@ Car_pydantic = pydantic_model_creator(Car, name="Car")
 CarIn_pydantic = pydantic_model_creator(
     Car, name="CarIn", exclude_readonly=True, exclude=("owner_id",)
 )
+CarOut_pydantic = pydantic_model_creator(
+    Car, name="CarOut", exclude=("category.prices",)
+)
+CarPostOut_pydantic = pydantic_model_creator(
+    Car, name="CarPostOut", exclude=("category.prices", "rendered_services")
+)
 
 
 class BoundServiceCategory(BaseModel):

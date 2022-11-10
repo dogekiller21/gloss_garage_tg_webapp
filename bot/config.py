@@ -5,4 +5,4 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TG_TOKEN = os.getenv("TELEGRAM_TOKEN")
-FRONT_END_LINK = "https://cd48-188-243-182-68.eu.ngrok.io/"
+FRONT_END_LINK = "https://6318-188-243-182-68.eu.ngrok.io"
