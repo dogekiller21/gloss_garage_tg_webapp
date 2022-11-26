@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from tortoise.contrib.pydantic import pydantic_model_creator
 
-from db.models import Service, User, ServiceCategoryPrice, CarCategory, Car
+from db.models import Service, User, ServiceCategoryPrice, CarCategory, Car, PaymentMethod
 from tortoise import Tortoise
 
 Tortoise.init_models(["db.models"], "models")
@@ -20,6 +20,10 @@ ServicePagination_pydantic = pydantic_model_creator(
 
 User_pydantic = pydantic_model_creator(User, name="User")
 UserIn_pydantic = pydantic_model_creator(User, name="UserIn", exclude_readonly=True)
+UserOut_pydantic = pydantic_model_creator(
+    User, name="UserOut", exclude=("is_admin", "is_sadmin"), computed=("roles",)
+)
+
 
 ServiceCategoryPrice_pydantic = pydantic_model_creator(
     ServiceCategoryPrice, name="ServiceCategoryPrice", exclude=("service",)
@@ -54,6 +58,12 @@ CarOut_pydantic = pydantic_model_creator(
 CarPostOut_pydantic = pydantic_model_creator(
     Car, name="CarPostOut", exclude=("category.prices", "rendered_services")
 )
+
+PaymentMethod_pydantic = pydantic_model_creator(PaymentMethod, name="PaymentMethod")
+PaymentMethodCropped_pydantic = pydantic_model_creator(PaymentMethod, name="PaymentMethodCropped",
+                                                       exclude=("rendered_services", ))
+PaymentMethodIn_pydantic = pydantic_model_creator(PaymentMethod, name="PaymentMethodIn",
+                                                  exclude_readonly=True)
 
 
 class BoundServiceCategory(BaseModel):

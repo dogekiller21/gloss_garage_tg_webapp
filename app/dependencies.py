@@ -6,7 +6,7 @@ from tortoise import Model
 
 from app.auth import jwt_dependency
 from db import SupremeAdmin
-from db.models import Service, CarCategory, User, Car
+from db.models import Service, CarCategory, User, Car, PaymentMethod
 
 
 async def user_depend(payload=Depends(jwt_dependency)) -> User:
@@ -14,6 +14,7 @@ async def user_depend(payload=Depends(jwt_dependency)) -> User:
     user = await User.get_or_none(tg_id=tg_id)
     if user is None:
         raise HTTPException(HTTP_404_NOT_FOUND, detail="User not found")
+    await user.fetch_related("is_sadmin", "cars")
     return user
 
 
@@ -24,7 +25,7 @@ async def admin_depend(user=Depends(user_depend)) -> User:
 
 
 async def sadmin_depend(user=Depends(admin_depend)) -> User:
-    if not await SupremeAdmin.exists(tg_id=user.tg_id):
+    if not user.is_sadmin:
         raise HTTPException(HTTP_403_FORBIDDEN, detail="Not a supreme admin")
     return user
 
@@ -46,3 +47,7 @@ async def get_category_depend(category_id: int) -> CarCategory:
 
 async def get_car_depend(car_id: int) -> Car:
     return await get_obj_by_pk(model=Car, pk=car_id)
+
+
+async def get_payment_method_depend(payment_method_id: int) -> Car:
+    return await get_obj_by_pk(model=PaymentMethod, pk=payment_method_id)

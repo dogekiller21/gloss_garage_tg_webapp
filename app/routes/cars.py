@@ -6,7 +6,8 @@ from app.utils import (
     simple_object_creation,
     update_from_dict,
     delete_obj,
-    get_paginated_items, get_all_car_brands, get_all_car_models,
+    get_paginated_items,
+    get_car_value,
 )
 from db.models import Car
 from db.pydantic_models import (
@@ -25,7 +26,7 @@ router = APIRouter(
 
 
 @router.get("")
-async def get_cars(q: str = None, limit: int = 5, page: int = 0):
+async def get_cars(q: str = None, limit: int = 5, page: int = 1):
     data = await get_paginated_items(
         q=q,
         page=page,
@@ -44,12 +45,12 @@ async def get_car(car=Depends(get_car_depend)):
 
 @router.get("/brands")
 async def get_car_brands():
-    return await get_all_car_brands()
+    return await get_car_value("brand")
 
 
 @router.get("/models")
 async def get_car_models():
-    return await get_all_car_models()
+    return await get_car_value("model")
 
 
 @router.post("")

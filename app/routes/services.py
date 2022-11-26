@@ -28,7 +28,7 @@ router = APIRouter(
 
 
 @router.get("")
-async def get_services(q: str | None = None, limit: int = 5, page: int = 0):
+async def get_services(q: str | None = None, limit: int = 5, page: int = 1):
     data = await get_paginated_items(
         q=q,
         page=page,
@@ -43,7 +43,7 @@ async def get_services(q: str | None = None, limit: int = 5, page: int = 0):
 
 @router.get("/{service_id:int}")
 async def get_service(service: Service = Depends(get_service_depend)):
-    return {**(await Service_pydantic.from_tortoise_orm(service)).dict()}
+    return {**(await Service_pydantic.from_tortoise_orm(service)).json()}
 
 
 @router.post("")

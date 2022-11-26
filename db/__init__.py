@@ -2,7 +2,7 @@ from tortoise import Tortoise
 
 from bot.constants import SUPREME_ADMINS_ID
 from db.config import DB_USER, DB_PASSWORD, DB_HOST, DB_NAME
-from db.models import SupremeAdmin
+from db.models import SupremeAdmin, User
 
 TORTOISE_ORM = {
     "connections": {
@@ -24,4 +24,8 @@ async def init_db():
 
 async def init_admins():
     for admin_id in SUPREME_ADMINS_ID:
-        await SupremeAdmin.get_or_create(tg_id=admin_id)
+        user = await User.get_or_none(tg_id=admin_id)
+        if user is None:
+            print(f"{admin_id} is not a known user")
+            return
+        await SupremeAdmin.get_or_create(user=user)

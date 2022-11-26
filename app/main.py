@@ -5,7 +5,7 @@ from tortoise.contrib.fastapi import register_tortoise
 
 import db
 from app.auth import validate_tg_data, create_access_token, DataStringForm
-from app.routes import services, categories, users, cars
+from app.routes import services, categories, users, cars, payment_methods
 from starlette.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -13,6 +13,7 @@ app.include_router(services.router)
 app.include_router(categories.router)
 app.include_router(users.router)
 app.include_router(cars.router)
+app.include_router(payment_methods.router)
 
 
 @app.post("/auth")
