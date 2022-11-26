@@ -68,7 +68,7 @@ async def update_from_dict(
     return_model: bool = False,
 ):
     if pydantic_model is None and not return_model:
-        raise ValueError("update_dict must not be None if return_model set to False")
+        raise ValueError("pydantic_model must not be None if return_model set to False")
     item = await model.get_or_none(pk=obj_pk)
     if item is None:
         raise HTTPException(HTTP_404_NOT_FOUND, detail="Does not exist")
