@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from tortoise.contrib.pydantic import pydantic_model_creator
+from tortoise.contrib.pydantic import pydantic_model_creator, PydanticModel
 
 from db.models import (
     Service,
@@ -7,7 +7,7 @@ from db.models import (
     ServiceCategoryPrice,
     CarCategory,
     Car,
-    PaymentMethod,
+    PaymentMethod, RenderedService,
 )
 from tortoise import Tortoise
 
@@ -23,6 +23,19 @@ ServicePagination_pydantic = pydantic_model_creator(
     exclude=("prices", "rendered_services"),
     computed=("max_default_price", "min_default_price"),
 )
+
+
+class CroppedPrices(PydanticModel):
+    category_id: int
+    default_price: int
+
+    class Config:
+        orig_model = ServiceCategoryPrice
+
+
+class ServiceCropped(ServiceIn_pydantic):
+    id: int
+    prices: list[CroppedPrices]
 
 
 User_pydantic = pydantic_model_creator(User, name="User")
@@ -59,9 +72,26 @@ Car_pydantic = pydantic_model_creator(Car, name="Car")
 CarIn_pydantic = pydantic_model_creator(
     Car, name="CarIn", exclude_readonly=True, exclude=("owner_id",)
 )
+
 CarOut_pydantic = pydantic_model_creator(
-    Car, name="CarOut", exclude=("category.prices",)
+    Car, name="CarOut", exclude=("category",)
 )
+
+
+class CarOut(
+    pydantic_model_creator(
+        Car,
+        name="_CarOut",
+        exclude_readonly=True)
+):
+    id: int
+    rendered_services: list[RenderedService]
+    category_id: int
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
 CarPostOut_pydantic = pydantic_model_creator(
     Car, name="CarPostOut", exclude=("category.prices", "rendered_services")
 )
@@ -89,3 +119,11 @@ class PaginationForm(BaseModel):
     q: str | None = None
     limit: int = 5
     page: int = 0
+
+
+class PaginationModelOut(BaseModel):
+    docs: list[dict]
+    hasNext: bool
+    hasPrev: bool
+    totalPages: int
+    totalDocs: int

@@ -16,4 +16,4 @@ async def get_users():
 
 @router.get("/me")
 async def get_current_user(current_user=Depends(user_depend)):
-    return {**(await UserOut_pydantic.from_tortoise_orm(current_user)).dict()}
+    return await UserOut_pydantic.from_tortoise_orm(current_user)

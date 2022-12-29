@@ -20,6 +20,4 @@ class UserMiddleware(BaseMiddleware):
         if is_created:
             logging.info(f"User added: {user}")
         data["current_user"] = user
-        data["is_supremacy_admin"] = await SupremeAdmin.exists(
-            tg_id=message.from_user.id
-        )
+        data["is_supremacy_admin"] = user.is_sadmin

@@ -23,7 +23,7 @@ router = APIRouter(
 )
 
 
-@router.get("")
+@router.get("", response_model=list[PaymentMethod_pydantic])
 async def get_payment_methods(exclude_services: bool = True):
     parse_pydantic_model = (
         PaymentMethodCropped_pydantic if exclude_services else PaymentMethod_pydantic
@@ -39,7 +39,7 @@ async def get_payment_methods(exclude_services: bool = True):
 async def get_payment_method(
     payment_method: PaymentMethod = Depends(get_payment_method_depend),
 ):
-    return {**(await PaymentMethod_pydantic.from_tortoise_orm(payment_method)).dict()}
+    return await PaymentMethod_pydantic.from_tortoise_orm(payment_method)
 
 
 @router.post("")
@@ -50,9 +50,7 @@ async def add_payment_method(payment_method_form: PaymentMethodIn_pydantic):
     )
     if not is_created:
         raise HTTPException(HTTP_409_CONFLICT, detail="Already Exist")
-    return {
-        **(await PaymentMethodCropped_pydantic.from_tortoise_orm(payment_method)).dict()
-    }
+    return await PaymentMethodCropped_pydantic.from_tortoise_orm(payment_method)
 
 
 @router.delete("/{payment_method_id:int}")
@@ -72,4 +70,4 @@ async def update_service(
         update_dict=payment_method_form.dict(),
         obj_pk=payment_method_id,
     )
-    return {**updated_payment_method_pydantic.dict()}
+    return updated_payment_method_pydantic

@@ -9,7 +9,7 @@ from db.pydantic_models import (
     AddServiceForm,
     BoundServiceCategory,
     ServiceCategoryPrice_pydantic,
-    ServicePagination_pydantic,
+    ServicePagination_pydantic, ServiceCropped, PaginationModelOut,
 )
 from app.utils import (
     get_paginated_items,
@@ -27,7 +27,7 @@ router = APIRouter(
 )
 
 
-@router.get("")
+@router.get("", response_model=PaginationModelOut)
 async def get_services(q: str | None = None, limit: int = 5, page: int = 1):
     data = await get_paginated_items(
         q=q,
@@ -43,7 +43,7 @@ async def get_services(q: str | None = None, limit: int = 5, page: int = 1):
 
 @router.get("/{service_id:int}")
 async def get_service(service: Service = Depends(get_service_depend)):
-    return {**(await Service_pydantic.from_tortoise_orm(service)).json()}
+    return await ServiceCropped.from_tortoise_orm(service)
 
 
 @router.post("")
@@ -61,7 +61,7 @@ async def add_service(service_form: AddServiceForm):
             default_price=price["default_price"],
         )
     service = await Service.get(pk=service.id)
-    return {**(await Service_pydantic.from_tortoise_orm(service)).dict()}
+    return await Service_pydantic.from_tortoise_orm(service)
 
 
 @router.delete("/{service_id:int}")
@@ -74,7 +74,7 @@ async def update_service(updated_service: AddServiceForm, service_id: int):
     updated_service_pydantic = await update_service_from_dict(
         update_dict=updated_service.dict(), service_id=service_id
     )
-    return {**updated_service_pydantic.dict()}
+    return updated_service_pydantic
 
 
 @router.post("/bound_price")
@@ -86,4 +86,4 @@ async def bound_service_category(bound_form: BoundServiceCategory):
     )
     if not is_created:
         raise HTTPException(HTTP_409_CONFLICT, detail="Already Exist")
-    return {**(await ServiceCategoryPrice_pydantic.from_tortoise_orm(bounded_info))}
+    return await ServiceCategoryPrice_pydantic.from_tortoise_orm(bounded_info)

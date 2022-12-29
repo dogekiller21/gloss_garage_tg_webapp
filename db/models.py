@@ -63,7 +63,7 @@ class Car(Model):
     id = fields.IntField(pk=True)
     brand = fields.CharField(max_length=30, null=True)
     model = fields.CharField(max_length=50, null=True)
-    numberplate = fields.CharField(max_length=50, null=False)
+    numberplate = fields.CharField(max_length=50, unique=True)
     owner = fields.ForeignKeyField(
         "models.User", related_name="cars", null=True, on_delete=fields.SET_NULL
     )
@@ -123,7 +123,7 @@ class Service(Model):
 
 class PaymentMethod(Model):
     id = fields.IntField(pk=True)
-    title = fields.CharField(max_length=20)
+    title = fields.CharField(max_length=20, unique=True)
     rendered_services: fields.ReverseRelation["RenderedService"]
 
     def __str__(self):
@@ -138,7 +138,7 @@ class RenderedService(Model):
     comment = fields.TextField(null=True)
     created_time = fields.DatetimeField(null=False, default=datetime.datetime.now)
     payment_method = fields.ForeignKeyField(
-        "models.PaymentMethod", null=True, related_name="rendered_services"
+        "models.PaymentMethod", related_name="rendered_services"
     )
 
     def __str__(self):

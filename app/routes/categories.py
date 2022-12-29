@@ -8,7 +8,7 @@ from db.models import CarCategory
 from db.pydantic_models import (
     CarCategoryIn_pydantic,
     CarCategoryOut_pydantic,
-    CarCategory_pydantic,
+    CarCategory_pydantic, PaginationModelOut,
 )
 from app.utils import get_paginated_items, update_from_dict, delete_obj
 
@@ -21,7 +21,7 @@ router = APIRouter(
 )
 
 
-@router.get("")
+@router.get("", response_model=PaginationModelOut)
 async def get_categories(q: str = None, limit: int = None, page: int = None):
     data = await get_paginated_items(
         q=q,
@@ -36,7 +36,7 @@ async def get_categories(q: str = None, limit: int = None, page: int = None):
 
 @router.get("/{category_id:int}")
 async def get_category(category: CarCategory = Depends(get_category_depend)):
-    return {**(await CarCategoryOut_pydantic.from_tortoise_orm(category)).dict()}
+    return await CarCategoryOut_pydantic.from_tortoise_orm(category)
 
 
 @router.post("")
@@ -46,7 +46,7 @@ async def add_category(category_form: CarCategoryIn_pydantic):
     )
     if not is_created:
         raise HTTPException(HTTP_409_CONFLICT, detail="Already Exist")
-    return {**(await CarCategoryOut_pydantic.from_tortoise_orm(category)).dict()}
+    return await CarCategoryOut_pydantic.from_tortoise_orm(category)
 
 
 @router.delete("/{category_id:int}")
@@ -62,4 +62,4 @@ async def update_category(updated_category: CarCategoryIn_pydantic, category_id:
         update_dict=updated_category.dict(),
         obj_pk=category_id,
     )
-    return {**updated_category_pydantic.dict()}
+    return updated_category_pydantic
