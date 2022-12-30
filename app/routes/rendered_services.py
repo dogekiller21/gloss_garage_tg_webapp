@@ -6,7 +6,7 @@ from app.dependencies import get_rendered_services_depend, RenderedServicesInfo
 from db.models import Car, RenderedService
 
 from db.pydantic_models import (
-    RenderedServiceIn, RenderedService_pydantic,
+    RenderedService_pydantic, RenderedServiceROnly_pydantic,
 )
 from app.utils import get_paginated_items, update_from_dict, delete_obj, paginate_rendered_services
 
@@ -37,7 +37,7 @@ async def get_rendered_services(
 
 
 @router.post("", response_model=RenderedService_pydantic)
-async def add_rendered_service(form: RenderedServiceIn):
+async def add_rendered_service(form: RenderedServiceROnly_pydantic):
     if form.car_id is None and (form.car_model is None or form.car_brand is None or form.car_numberplate is None):
         raise HTTPException(
             HTTP_422_UNPROCESSABLE_ENTITY,

@@ -46,17 +46,22 @@ async def get_car(car=Depends(get_car_depend)):
 
 @router.get("/brands")
 async def get_car_brands():
-    return await get_car_values(["brand"])
+    return list(set(await get_car_values(["brand"])))
 
 
 @router.get("/models")
 async def get_car_models():
-    return await get_car_values(["model"])
+    return list(set(await get_car_values(["model"])))
 
 
 @router.get("/numberplates")
 async def get_car_numberplates():
     return await get_car_values(["id", "numberplate"])
+
+
+@router.get("/check_numberplate")
+async def check_car_numberplate(numberplate: str):
+    return {"unique": not (await Car.exists(numberplate=numberplate))}
 
 
 @router.post("")

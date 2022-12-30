@@ -46,6 +46,11 @@ async def get_service(service: Service = Depends(get_service_depend)):
     return await ServiceCropped.from_tortoise_orm(service)
 
 
+@router.get("/check_title")
+async def check_service_title(title: str):
+    return {"unique": not (await Service.exists(title=title))}
+
+
 @router.post("")
 async def add_service(service_form: AddServiceForm):
     service_dict = service_form.dict()

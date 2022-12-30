@@ -17,17 +17,5 @@ RenderedServiceROnly_pydantic = pydantic_model_creator(
 )
 
 
-class RenderedServiceIn(pydantic_model_creator(
-        RenderedService,
-        name="__RenderedServiceIn",
-        exclude_readonly=True,
-        exclude=("car",),
-    )):
-    car_id: Annotated[int, Field(title="Car id")] = None
-    car_numberplate: Annotated[str, Field(title="Car numberplate")] = None
-    car_model: Annotated[str, Field(title="Car model")] = None
-    car_brand: Annotated[str, Field(title="Car brand")] = None
-
-
 class RenderedServiceOut(RenderedServiceROnly_pydantic):
     id: int

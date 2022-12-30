@@ -39,6 +39,11 @@ async def get_category(category: CarCategory = Depends(get_category_depend)):
     return await CarCategoryOut_pydantic.from_tortoise_orm(category)
 
 
+@router.get("/check_title")
+async def check_category_title(title: str):
+    return {"unique": not (await CarCategory.exists(title=title))}
+
+
 @router.post("")
 async def add_category(category_form: CarCategoryIn_pydantic):
     category, is_created = await CarCategory.get_or_create(

@@ -21,9 +21,9 @@ async def start_command(message: types.Message):
     )
 
 
-@dp.message_handler()
-async def answer_button_handler(message: types.Message):
-    await bot.set_chat_menu_button(
-        chat_id=message.chat.id,
-        menu_button=types.MenuButtonWebApp(text="Приложение", web_app=webapp_info),
-    )
+# @dp.message_handler()
+# async def answer_button_handler(message: types.Message):
+#     await bot.set_chat_menu_button(
+#         chat_id=message.chat.id,
+#         menu_button=types.MenuButtonWebApp(text="Приложение", web_app=webapp_info),
+#     )
