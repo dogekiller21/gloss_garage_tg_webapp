@@ -11,6 +11,7 @@ from db.pydantic_models import (
     CarCategory_pydantic, PaginationModelOut,
 )
 from app.utils import get_paginated_items, update_from_dict, delete_obj
+from db.pydantic_models.categories_pydantic import CheckCarCategoryTitleForm
 
 router = APIRouter(
     prefix="/categories",
@@ -39,9 +40,9 @@ async def get_category(category: CarCategory = Depends(get_category_depend)):
     return await CarCategoryOut_pydantic.from_tortoise_orm(category)
 
 
-@router.get("/check_title")
-async def check_category_title(title: str):
-    return {"unique": not (await CarCategory.exists(title=title))}
+@router.post("/check_title")
+async def check_category_title(form: CheckCarCategoryTitleForm):
+    return {"unique": not (await CarCategory.exists(title=form.title))}
 
 
 @router.post("")

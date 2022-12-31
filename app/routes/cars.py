@@ -15,6 +15,7 @@ from db.pydantic_models import (
     CarOut,
     CarPostOut_pydantic, PaginationModelOut,
 )
+from db.pydantic_models.cars_pydantic import CheckCarNumberplateForm
 
 router = APIRouter(
     prefix="/cars",
@@ -59,9 +60,9 @@ async def get_car_numberplates():
     return await get_car_values(["id", "numberplate"])
 
 
-@router.get("/check_numberplate")
-async def check_car_numberplate(numberplate: str):
-    return {"unique": not (await Car.exists(numberplate=numberplate))}
+@router.post("/check_numberplate")
+async def check_car_numberplate(form: CheckCarNumberplateForm):
+    return {"unique": not (await Car.exists(numberplate=form.numberplate))}
 
 
 @router.post("")

@@ -17,6 +17,7 @@ from app.utils import (
     update_service_from_dict,
     delete_obj,
 )
+from db.pydantic_models.services_pydantic import CheckServiceTitleForm
 
 router = APIRouter(
     prefix="/services",
@@ -46,9 +47,9 @@ async def get_service(service: Service = Depends(get_service_depend)):
     return await ServiceCropped.from_tortoise_orm(service)
 
 
-@router.get("/check_title")
-async def check_service_title(title: str):
-    return {"unique": not (await Service.exists(title=title))}
+@router.post("/check_title")
+async def check_service_title(form: CheckServiceTitleForm):
+    return {"unique": not (await Service.exists(title=form.title))}
 
 
 @router.post("")
